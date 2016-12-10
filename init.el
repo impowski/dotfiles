@@ -17,7 +17,6 @@
 
 (defconst imp-packages
   '(anzu
-    auto-complete
     base16-theme
     cask
     cargo
@@ -102,10 +101,13 @@
 (setq company-minimum-prefix-length 1)
 
 (require 'racer)
+(setq racer-rust-src-path "/usr/src/rust/src/")
 (add-hook 'rust-mode-hook #'racer-mode)
 (add-hook 'racer-mode-hook #'eldoc-mode)
 (add-hook 'racer-mode-hook #'company-mode)
 (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+
+(setq company-tooltip-align-annotations t)
 
 (require 'irony)
 (add-to-list 'company-backends '(company-irony-c-headers company-irony))
