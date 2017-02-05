@@ -44,6 +44,10 @@
                                           newline-mark))
                             (whitespace-mode 1)))
 
+;; indent-guide
+(use-package indent-guide
+  :init (indent-guide-global-mode))
+
 ;; Package: volatile-highlights
 ;; GROUP: Editing -> Volatile Highlights
 (require 'volatile-highlights)

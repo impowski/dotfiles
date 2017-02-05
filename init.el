@@ -3,164 +3,121 @@
 ;;; Commentary
 
 ;;; Code:
-
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
 
 (setq inhibit-startup-message t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(defconst imp-packages
-  '(anzu
-    base16-theme
-    cask
-    cargo
-    company
-    company-irony
-    company-irony-c-headers
-    circe
-    cmake-ide
-    cmake-mode
-    clean-aindent-mode
-    comment-dwim-2
-    duplicate-thing
-    flycheck
-    flycheck-irony
-    flycheck-rust
-    helm
-    helm-swoop
-    magit
-    markdown-mode
-    jabber
-    jabber-otr
-    dtrt-indent
-    ws-butler
-    iedit
-    irony
-    irony-eldoc
-    jade-mode
-    yasnippet
-    smartparens
-    powerline
-    rtags
-    rust-mode
-    racer
-    use-package
-    projectile
-    volatile-highlights
-    undo-tree
-    zygospore))
-
-(defun install-packages ()
-  "Install all required packages."
-  (interactive)
-  (unless package-archive-contents
-    (package-refresh-contents))
-  (dolist (package imp-packages)
-    (unless (package-installed-p package)
-      (package-install package))))
-
-(install-packages)
-
+(require 'init-elpa)
 (require 'init-editing)
-(require 'setup-environment)
+(require 'init-environment)
 (require 'init-cmake)
 (require 'init-git)
-(require 'init-jabber)
 (require 'init-helm)
 
-;;(eval-after-load 'company
-;;  '(add-to-list 'company-backends '(company-irony-c-headers company-irony)))
-;;(add-hook 'irony-mode-hook 'company-irony-setup-begin-commands)
+(setq load-prefer-newer t)
 
-;;(add-hook 'c++-mode-hook 'irony-mode)
-;;(add-hook 'c-mode-hook 'irony-mode)
-;;(add-hook 'objc-mode-hook 'irony-mode)
+;; auto-compile
+(use-package auto-compile
+  :ensure t
+  :config
+  (progn
+    (auto-compile-on-load-mode)
+    (auto-compile-on-save-mode)))
 
-;;(add-hook 'after-init-hook #'global-flycheck-mode)
-;;(eval-after-load 'flycheck
-;;  '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+;; cargo
+(use-package cargo
+  :init (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
-;;(defun my-irony-mode-hook ()
-;;  (define-key irony-mode-map [remap completion-at-point]
-;;    'irony-completion-at-point-async)
-;;  (define-key irony-mode-map [remap complete-symbol]
-;;    'irony-completion-at-point-async))
-;;(add-hook 'irony-mode-hook 'my-irony-mode-hook)
-;;(add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+;; company
+(use-package company
+  :init (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (progn
+    (setq company-tooltip-limit 20)
+    (setq company-tooltip-align-annotations 't)
+    (setq company-idle-delay .3)
+    (setq company-begin-commands '(self-insert-command))
+    (global-set-key (kbd "C-c /") 'company-files)))
 
-;; autocomplete
-(require 'company)
-(add-hook 'after-init-hook 'global-company-mode)
-(setq company-idle-delay 0.2)
-(setq company-minimum-prefix-length 1)
+;; company-web
+(use-package company-web-html
+  :init (add-to-list 'company-backends 'company-web-html))
 
-(require 'racer)
-(setq racer-rust-src-path "/usr/src/rust/src/")
-(add-hook 'rust-mode-hook #'racer-mode)
-(add-hook 'racer-mode-hook #'eldoc-mode)
-(add-hook 'racer-mode-hook #'company-mode)
-(add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+(use-package company-web-jade
+  :init (add-to-list 'company-backends 'company-web-jade))
+
+(use-package company-web-slim
+  :init (add-to-list 'company-backends 'company-web-slim))
+
+;; flycheck
+(use-package flycheck
+  :init
+  (progn
+    (add-hook 'c++-mode-hook 'flycheck-mode)
+    (add-hook 'c-mode-hook 'flycheck-mode)
+    (flycheck-irony-setup)))
+
+;; flycheck-rust
+(use-package flycheck-rust
+  :init (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+;; rust-mode
+(use-package rust-mode)
+
+;; racer
+(use-package racer
+  :init
+  (progn
+    (add-hook 'rust-mode-hook #'racer-mode)
+    (add-hook 'racer-mode-hook #'eldoc-mode)
+    (add-hook 'racer-mode-hook #'company-mode))
+  :config
+  (setq racer-rust-src-path "~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/"))
 
 (setq company-tooltip-align-annotations t)
 
-(require 'irony)
-(add-to-list 'company-backends '(company-irony-c-headers company-irony))
-(add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-(add-hook 'c++-mode-hook 'irony-mode)
-(add-hook 'c-mode-hook 'irony-mode)
+;; irony
+(use-package irony
+  :init
+  (progn
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+    (add-to-list 'company-backends '(company-irony-c-headers company-irony))
+    (add-hook 'c-mode-hook 'irony-mode)
+    (add-hook 'c++-mode-hook 'irony-mode)))
 
-(require 'flycheck)
-(add-hook 'c++-mode-hook 'flycheck-mode)
-(add-hook 'c-mode-hook 'flycheck-mode)
-(flycheck-irony-setup)
+;; tagedit
+(use-package tagedit
+  :init (add-hook 'html-mode-hook (lambda()
+                                    (tagedit-mode 1)
+                                    (tagedit-add-experimental-features))))
 
-;; rtags
-(require 'rtags)
+;; js-mode
+(use-package js2-mode
+  :init
+  (progn
+    (add-hook 'js-mode-hook 'js2-minor-mode)
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+    (add-to-list 'interpreter-mode-alist '("node" . js2-mode))
+    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))))
 
-;; jade-mode
-(require 'jade-mode)
+;; vue-mode
+(use-package vue-mode
+  :init (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode)))
 
-;; cmake-ide
-(cmake-ide-setup)
+;; powerline
+(use-package powerline
+  :init (powerline-center-theme))
 
-(global-set-key (kbd "<f5>") 'cmake-ide-compile)
+;; projectile
+(use-package projectile
+  :init (projectile-mode)
+  :config (setq projectile-enable-catching t))
 
-(require 'dtrt-indent)
-(dtrt-indent-mode 1)
-
-(require 'yasnippet)
-(yas-global-mode 1)
-
-;; Package: clean-aindent-mode
-(require 'clean-aindent-mode)
-(add-hook 'prog-mode-hook 'clean-aindent-mode)
-
-;; Package: powerline
-(require 'powerline)
-(powerline-center-theme)
-
-;; Package: projectile
-(require 'projectile)
-(projectile-global-mode)
-(setq projectile-enable-catching t)
-
-;; Package: zygospore
+;; zygospore
 (global-set-key (kbd "C-x 1") 'zygospore-toggle-delete-other-windows)
 
-;; Style
-(global-set-key (kbd "RET") 'newline-and-indent)
-(global-set-key (kbd "C-c w") 'whitespace-mode)
-
-(add-hook 'prog-mode-hook (lambda () (interactive) (setq show-trailing-whitespace 1)))
-
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
 (setq make-backup-files nil)
 
 ;; Font
@@ -168,14 +125,5 @@
 
 ;; Theme
 (load-theme 'base16-google-dark t)
-
-;; Compilation
-(global-set-key (kbd "<f5>") (lambda ()
-                               (interactive)
-                               (setq-local compilation-read-command nil)
-                               (call-interactively 'compile)))
-;; Setup GDB
-(setq gdb-many-windows t
-      gdb-show-main t)
 
 ;;; init.el ends here
