@@ -1,4 +1,4 @@
-;;; magit --- Emacs magit
+\;;; magit --- Emacs magit
 ;;; Commentary:
 ;;; Package: magit
 
@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(global-set-key "\C-cm" 'magit-status)
+(global-set-key "C-cm" 'magit-status)
 (custom-set-variables
  '(magit-save-some-buffers (quote dontask)))
 

@@ -46,41 +46,39 @@
 
 ;; indent-guide
 (use-package indent-guide
-  :init (indent-guide-global-mode))
+  :config (indent-guide-global-mode))
 
-;; Package: volatile-highlights
-;; GROUP: Editing -> Volatile Highlights
-(require 'volatile-highlights)
-(volatile-highlights-mode t)
+;; volatile-highlights
+(use-package volatile-highlights
+  :config (volatile-highlights-mode t))
 
-;; Package: clean-aindent-mode
-;; GROUP: Editing -> Indent -> Clean Aindent
-(require 'clean-aindent-mode)
-(add-hook 'prog-mode-hook 'clean-aindent-mode)
+;; clean-aindent-mode
+(use-package clean-aindent-mode
+  :config
+  (add-hook 'prog-mode-hook 'clean-aindent-mode))
 
 
-;; PACKAGE: dtrt-indent
-(require 'dtrt-indent)
-(dtrt-indent-mode 1)
-(setq dtrt-indent-verbosity 0)
+;; dtrt-indent
+(use-package dtrt-indent
+  :config
+  (dtrt-indent-mode 1)
+  (setq dtrt-indent-verbosity 0))
 
-;; PACKAGE: ws-butler
+;; ws-butler
 (require 'ws-butler)
 (add-hook 'c-mode-common-hook 'ws-butler-mode)
 (add-hook 'text-mode 'ws-butler-mode)
 (add-hook 'fundamental-mode 'ws-butler-mode)
 
-;; Package: undo-tree
-;; GROUP: Editing -> Undo -> Undo Tree
-(require 'undo-tree)
-(global-undo-tree-mode)
+;; undo-tree
+(use-package undo-tree
+  :config (global-undo-tree-mode))
 
-;; Package: yasnippet
-;; GROUP: Editing -> Yasnippet
-(require 'yasnippet)
-(yas-global-mode 1)
+;; yasnippet
+(use-package yasnippet
+  :config (yas-global-mode 1))
 
-;; PACKAGE: smartparens
+;; smartparens
 (require 'smartparens-config)
 (setq sp-base-key-bindings 'paredit)
 (setq sp-autoskip-closing-pair 'always)
@@ -90,7 +88,7 @@
 (show-smartparens-global-mode +1)
 (smartparens-global-mode 1)
 
-;; PACKAGE: comment-dwim-2
+;; comment-dwim-2
 (global-set-key (kbd "M-;") 'comment-dwim-2)
 
 ;; Jump to end of snippet definition
@@ -99,7 +97,7 @@
 ;; Inter-field navigation
 (defun yas/goto-end-of-active-field ()
   (interactive)
-  (let* ((snippet (car (yas--snippets-at-point)))
+  (let* ((snippet (car (yas-active-snippets)))
          (position (yas--field-end (yas--snippet-active-field snippet))))
     (if (= (point) position)
         (move-end-of-line 1)
@@ -107,7 +105,7 @@
 
 (defun yas/goto-start-of-active-field ()
   (interactive)
-  (let* ((snippet (car (yas--snippets-at-point)))
+  (let* ((snippet (car (yas-active-snippets)))
          (position (yas--field-start (yas--snippet-active-field snippet))))
     (if (= (point) position)
         (move-beginning-of-line 1)
@@ -127,7 +125,7 @@
 ;; Wrap around region
 (setq yas-wrap-around-region t)
 
-(add-hook 'term-mode-hook (lambda() (setq yas-dont-activate t)))
+(add-hook 'term-mode-hook (lambda() (setq yas-dont-activate-functions t)))
 
 ;; PACKAGE: anzu
 ;; GROUP: Editing -> Matching -> Isearch -> Anzu
@@ -242,12 +240,6 @@ indent yanked text (with prefix arg don't indent)."
   "Indent the currently visited buffer."
   (interactive)
   (indent-region (point-min) (point-max)))
-
-;; prelude-editing.el
-(defcustom prelude-indent-sensitive-modes
-  '(coffee-mode python-mode slim-mode haml-mode yaml-mode)
-  "Modes for which auto-indenting is suppressed."
-  :type 'list)
 
 (defun indent-region-or-buffer ()
   "Indent a region if selected, otherwise the whole buffer."

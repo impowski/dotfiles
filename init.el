@@ -51,17 +51,31 @@
 (use-package company-web-slim
   :init (add-to-list 'company-backends 'company-web-slim))
 
+;; evil
+; (use-package evil
+  ; :config
+  ; (evil-mode 1))
+
 ;; flycheck
-(use-package flycheck
-  :init
-  (progn
-    (add-hook 'c++-mode-hook 'flycheck-mode)
-    (add-hook 'c-mode-hook 'flycheck-mode)
-    (flycheck-irony-setup)))
+(use-package flycheck)
 
 ;; flycheck-rust
 (use-package flycheck-rust
   :init (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+;; flx
+(use-package flx)
+
+;; flx-ido
+(use-package flx-ido
+  :init
+  :config
+  (ido-mode 1)
+  (ido-everywhere 1)
+  (flx-ido-mode 1)
+  (progn
+    (setq ido-enable-flex-matching t)
+    (setq ido-use-faces nil)))
 
 ;; rust-mode
 (use-package rust-mode)
@@ -77,15 +91,6 @@
   (setq racer-rust-src-path "~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/"))
 
 (setq company-tooltip-align-annotations t)
-
-;; irony
-(use-package irony
-  :init
-  (progn
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-    (add-to-list 'company-backends '(company-irony-c-headers company-irony))
-    (add-hook 'c-mode-hook 'irony-mode)
-    (add-hook 'c++-mode-hook 'irony-mode)))
 
 ;; tagedit
 (use-package tagedit
@@ -107,13 +112,30 @@
   :init (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-mode)))
 
 ;; powerline
-(use-package powerline
-  :init (powerline-center-theme))
+(use-package spaceline
+  :config
+  (use-package spaceline-config
+    :config
+    (spaceline-spacemacs-theme)
+    (spaceline-helm-mode)
+    (spaceline-toggle-battery-on)
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-flycheck-info-on)
+    (spaceline-toggle-buffer-size-off)
+    (spaceline-toggle-auto-compile-on)
+    (spaceline-info-mode)
+    ))
 
 ;; projectile
 (use-package projectile
   :init (projectile-mode)
   :config (setq projectile-enable-catching t))
+
+;; smex
+(use-package smex
+  :ensure t
+  :init (smex-initialize)
+  :bind ("M-x" . smex))
 
 ;; zygospore
 (global-set-key (kbd "C-x 1") 'zygospore-toggle-delete-other-windows)

@@ -12,39 +12,48 @@
     cask
     cargo
     company
-    company-irony
-    company-irony-c-headers
     company-web
     cmake-ide
     cmake-mode
     clean-aindent-mode
     comment-dwim-2
-    duplicate-thing
-    flycheck
-    flycheck-irony
-    flycheck-rust
-    helm
-    helm-swoop
-    magit
-    markdown-mode
+    diminish
     dtrt-indent
-    tagedit
-    ws-butler
+    duplicate-thing
+    evil
+    flycheck
+    flycheck-rust
+    flx
+    flx-ido
+    helm
+    helm-ag
+    helm-flx
+    helm-make
+    helm-mode-manager
+    helm-projectile
+    helm-swoop
+    helm-themes
+    imenu
+    popwin
+    projectile
     indent-guide
     iedit
-    irony
-    irony-eldoc
+    ido
     jade-mode
     js2-mode
     js2-refactor
+    magit
+    markdown-mode
+    tagedit
+    ws-butler
     yasnippet
     smartparens
-    powerline
+    smex
+    spaceline
     rtags
     rust-mode
     racer
-    use-package
-    projectile
+    use-package    
     vue-mode
     volatile-highlights
     undo-tree

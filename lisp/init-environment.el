@@ -11,9 +11,9 @@
 (size-indication-mode)
 
 (setq frame-title-format
-      '("" invocation-name " - " (:eval (if (buffer-file-name)
-                                            (abbreviate-file-name (buffer-file-name))
-                                          "%b"))))
+      '((:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b"))))
 (add-hook 'prog-mode-hook 'linum-mode)
 
 (column-number-mode 1)
