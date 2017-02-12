@@ -24,29 +24,43 @@
 
 ;; auto-compile
 (use-package auto-compile
-  :commands
-  (auto-compile-on-load-mode
-   auto-compile-on-save-mode))
+  :defer t
+  :init
+  (progn
+    (setq auto-compile-display-buffer nil
+          auto-compile-use-mode-line nil
+          auto-compile-mode-line-counter t)
+    (add-hook 'emacs-lisp-mode-hook 'auto-compile-mode)))
 
 (setq load-prefer-newer t)
 
 ;; cargo
 (use-package cargo
+  :defer t
   :init
   (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
 ;; company
 (use-package company
-  :ensure t
+  :defer t
   :bind
   (("C-c /" . company-files))
   :init
-  (global-company-mode)
-  :config
-  (setq company-idle-delay .2)
-  (setq company-tooltip-limit 20)
-  (setq company-tooltip-align-annotations 't)
-  (setq company-begin-commands '(self-insert-command)))
+  (progn
+    (setq
+     company-idle-delay .2
+     company-minimum-prefix-length 2
+     company-require-match nil
+     company-dabbrev-ignore-case nil
+     company-dabbrev-downcase nil)
+    (global-company-mode)
+    ))
+
+(use-package company-statistics
+  :defer t
+  :init
+  (progn
+    (add-hook 'company-mode-hook 'company-statistics-mode)))
 
 ;; company-web
 (use-package company-web-html
@@ -68,12 +82,16 @@
 
 ;; flycheck
 (use-package flycheck
-  :ensure t
-  :commands flyspell-mode)
+  :defer t
+  :init
+  (progn
+    (setq flycheck-standard-error-navigation nil
+          flycheck-global-modes nil)
+    (global-flycheck-mode 1)))
 
 ;; flycheck-rust
 (use-package flycheck-rust
-  :ensure flycheck
+  :defer t
   :init (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; flx
@@ -91,10 +109,16 @@
     (setq ido-use-faces nil)))
 
 ;; rust-mode
-(use-package rust-mode)
+(use-package rust-mode
+  :defer t)
+
+;; toml-mode
+(use-package toml-mode
+  :mode "/\\(Cargo.lock\\|\\.cargo/config\\)\\'")
 
 ;; racer
 (use-package racer
+  :defer t
   :init
   (progn
     (add-hook 'rust-mode-hook #'racer-mode)
@@ -126,17 +150,16 @@
 ;; powerline
 (use-package spaceline
   :config
-  (use-package spaceline-config
-    :config
-    (spaceline-spacemacs-theme)
-    (spaceline-helm-mode)
-    (spaceline-toggle-battery-on)
-    (spaceline-toggle-minor-modes-off)
-    (spaceline-toggle-flycheck-info-on)
-    (spaceline-toggle-buffer-size-off)
-    (spaceline-toggle-auto-compile-on)
-    (spaceline-info-mode)
-    ))
+  (require 'spaceline-config)
+  (spaceline-spacemacs-theme)
+  (spaceline-helm-mode)
+  (spaceline-toggle-battery-on)
+  (spaceline-toggle-minor-modes-off)
+  (spaceline-toggle-flycheck-info-on)
+  (spaceline-toggle-buffer-size-off)
+  (spaceline-toggle-auto-compile-on)
+  (spaceline-info-mode)
+  )
 
 ;; projectile
 (use-package projectile
@@ -145,8 +168,7 @@
 
 ;; smex
 (use-package smex
-  :ensure t
-  :init (smex-initialize)
+  :defer t
   :bind ("M-x" . smex))
 
 ;; zygospore

@@ -1,45 +1,92 @@
+;; helm
 (use-package helm
+  :defer 1
   :bind
   (("M-y" . helm-show-kill-ring)
-   ("C-x b" . helm-mini)
+   ("C-x b" . helm-buffers-list)
    ("C-x C-f" . helm-find-files)
    ("C-h SPC" . helm-all-mark-rings)
    ("C-c h o" . helm-occur)
-   ("C-c h x" . helm-register))
-  )
-(require 'helm-config)
-(require 'helm-grep)
+   ("C-c h x" . helm-register)
+   (:map minibuffer-local-map
+         ("M-p" . helm-minibuffer-history)
+         ("M-n" . helm-minibuffer-history))
+   )
+  :config
+  (progn (setq-default helm-command-prefix-key "C-c h")
+         (require 'helm-config)
+         (add-to-list 'helm-sources-using-default-as-input 'helm-source-man-pages)
+         (bind-keys :map helm-map
+                    ([tab] . helm-execute-persistent-action)
+                    ("C-i" . helm-execute-persistent-action)
+                    ("C-z" . helm-select-action))
+         )
+  (setq
+   helm-scroll-amount 4
+   helm-ff-search-library-in-sexp t
+   helm-split-window-in-side-p t
+   helm-candidate-number-limit 500
+   helm-ff-file-name-history-use-recentf t
+   helm-move-to-line-cycle-in-source t
+   helm-buffers-fuzzy-matching t))
 
-;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
-;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
-;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
-(global-set-key (kbd "C-c h") 'helm-command-prefix)
+(use-package helm-flx
+  :defer t
+  :config
+  (progn (setq helm-flx-for-helm-find-files nil)
+         (helm-flx-mode)))
+
+;; helm-make
+(use-package helm-make
+  :defer t)
+
+;; helm-projectile
+(use-package helm-projectile
+  :commands (helm-projectile-switch-to-buffer
+             helm-projectile-find-dir
+             helm-projectile-dired-find-dir
+             helm-projectile-recentf
+             helm-projectile-find-file
+             helm-projectile-grep
+             helm-projectile
+             helm-projectile-switch-project))
+
+;; helm-swoop
+(use-package helm-swoop
+  :defer t
+  :bind
+  (
+   ("C-c h o" . helm-swoop)
+   ("C-c s" . helm-multi-swoop-all)
+   (:map isearch-mode-map
+         ("M-i" . helm-swoop-from-isearch))
+   (:map helm-swoop-map
+         ("M-i" . helm-multi-swoop-all-from-helm-swoop))
+   )
+  :init
+  (progn
+    (setq helm-multi-swoop-edit-save t
+          helm-swoop-split-direction 'split-window-vertically
+          helm-swoop-speed-or-color t
+          helm-swoop-split-window-function 'helm-default-display-buffer
+          helm-swoop-pre-input-function (lambda () "")))
+  )
+
+
 (global-unset-key (kbd "C-x c"))
 
-(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebihnd tab to do persistent action
-(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB works in terminal
-(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
-
-(define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
-(define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
-(define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward)
+(use-package helm-grep
+  :ensure helm
+  :bind
+  ((:map helm-grep-mode-map
+         ("<return>" . helm-grep-mode-jump-other-window)
+         ("n" . helm-grep-mode-jump-other-window-forward)
+         ("p" . helm-grep-mode-jump-other-window-backward))
+   )
+  )
 
 (when (executable-find "curl")
   (setq helm-net-prefer-curl t))
-
-(setq
- helm-scroll-amount 4 ; scroll 4 lines other window using M-<next>/M-<prior>
- helm-ff-search-library-in-sexp t ; search for library in `require' and `declare-function' sexp.
- helm-split-window-in-side-p t ;; open helm buffer inside current window, not occupy whole other window
- helm-candidate-number-limit 500 ; limit the number of displayed canidates
- helm-ff-file-name-history-use-recentf t
- helm-move-to-line-cycle-in-source t ; move to end or beginning of source when reaching top or bottom of source.
- helm-buffers-fuzzy-matching t          ; fuzzy matching buffer names when non-nil
-                                        ; useful in helm-mini that lists buffers
- )
-
-
-(add-to-list 'helm-sources-using-default-as-input 'helm-source-man-pages)
 
 (define-key 'help-command (kbd "C-f") 'helm-apropos)
 (define-key 'help-command (kbd "r") 'helm-info-emacs)
@@ -53,42 +100,9 @@
 ;;; Save current position to mark ring
 (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
 
-;; show minibuffer history with Helm
-(define-key minibuffer-local-map (kbd "M-p") 'helm-minibuffer-history)
-(define-key minibuffer-local-map (kbd "M-n") 'helm-minibuffer-history)
-
 (define-key global-map [remap find-tag] 'helm-etags-select)
 
 (define-key global-map [remap list-buffers] 'helm-buffers-list)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PACKAGE: helm-swoop                ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Locate the helm-swoop folder to your path
-(require 'helm-swoop)
-
-;; Change the keybinds to whatever you like :)
-(global-set-key (kbd "C-c h o") 'helm-swoop)
-(global-set-key (kbd "C-c s") 'helm-multi-swoop-all)
-
-;; When doing isearch, hand the word over to helm-swoop
-(define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-
-;; From helm-swoop to helm-multi-swoop-all
-(define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-
-;; Save buffer when helm-multi-swoop-edit complete
-(setq helm-multi-swoop-edit-save t)
-
-;; If this value is t, split window inside the current window
-(setq helm-swoop-split-with-multiple-windows t)
-
-;; Split direcion. 'split-window-vertically or 'split-window-horizontally
-(setq helm-swoop-split-direction 'split-window-vertically)
-
-;; If nil, you can slightly boost invoke speed in exchange for text color
-(setq helm-swoop-speed-or-color t)
-
-(helm-mode 1)
 
 (provide 'init-helm)
