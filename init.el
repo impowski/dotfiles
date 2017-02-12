@@ -3,53 +3,63 @@
 ;;; Commentary
 
 ;;; Code:
-(add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
+
+(defvar personal-dir (file-name-directory load-file-name)
+  "The root dir of personal Emacs config.")
+(defvar personal-lisp-dir (expand-file-name "lisp" personal-dir))
+
+(add-to-list 'load-path personal-lisp-dir)
+
+(package-initialize)
+
+(require 'init-elpa)
+(require 'init-environment)
+(require 'init-editing)
+(require 'init-helm)
+(require 'init-git)
 
 (setq inhibit-startup-message t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(require 'init-elpa)
-(require 'init-editing)
-(require 'init-environment)
-(require 'init-cmake)
-(require 'init-git)
-(require 'init-helm)
+;; auto-compile
+(use-package auto-compile
+  :commands
+  (auto-compile-on-load-mode
+   auto-compile-on-save-mode))
 
 (setq load-prefer-newer t)
 
-;; auto-compile
-(use-package auto-compile
-  :ensure t
-  :config
-  (progn
-    (auto-compile-on-load-mode)
-    (auto-compile-on-save-mode)))
-
 ;; cargo
 (use-package cargo
-  :init (add-hook 'rust-mode-hook 'cargo-minor-mode))
+  :init
+  (add-hook 'rust-mode-hook 'cargo-minor-mode))
 
 ;; company
 (use-package company
-  :init (add-hook 'after-init-hook 'global-company-mode)
+  :ensure t
+  :bind
+  (("C-c /" . company-files))
+  :init
+  (global-company-mode)
   :config
-  (progn
-    (setq company-tooltip-limit 20)
-    (setq company-tooltip-align-annotations 't)
-    (setq company-idle-delay .3)
-    (setq company-begin-commands '(self-insert-command))
-    (global-set-key (kbd "C-c /") 'company-files)))
+  (setq company-idle-delay .2)
+  (setq company-tooltip-limit 20)
+  (setq company-tooltip-align-annotations 't)
+  (setq company-begin-commands '(self-insert-command)))
 
 ;; company-web
 (use-package company-web-html
-  :init (add-to-list 'company-backends 'company-web-html))
+  :ensure company
+  :config (add-to-list 'company-backends 'company-web-html))
 
-(use-package company-web-jade
-  :init (add-to-list 'company-backends 'company-web-jade))
+(use-package company-web
+  :ensure company
+  :config (add-to-list 'company-backends 'company-web-jade))
 
 (use-package company-web-slim
-  :init (add-to-list 'company-backends 'company-web-slim))
+  :ensure company
+  :config (add-to-list 'company-backends 'company-web-slim))
 
 ;; evil
 ; (use-package evil
@@ -57,10 +67,13 @@
   ; (evil-mode 1))
 
 ;; flycheck
-(use-package flycheck)
+(use-package flycheck
+  :ensure t
+  :commands flyspell-mode)
 
 ;; flycheck-rust
 (use-package flycheck-rust
+  :ensure flycheck
   :init (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; flx
@@ -100,12 +113,11 @@
 
 ;; js-mode
 (use-package js2-mode
-  :init
-  (progn
-    (add-hook 'js-mode-hook 'js2-minor-mode)
-    (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-    (add-to-list 'interpreter-mode-alist '("node" . js2-mode))
-    (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))))
+  :mode "\\.js\\'"
+  :mode "\\.jsx\\'"
+  :config
+  (add-hook 'js-mode-hook 'js2-minor-mode)
+  (add-to-list 'interpreter-mode-alist '("node" . js2-mode)))
 
 ;; vue-mode
 (use-package vue-mode

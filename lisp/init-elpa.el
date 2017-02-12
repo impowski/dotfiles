@@ -1,8 +1,7 @@
-(use-package package
-  :init
-  (add-to-list 'package-archives
-               '("melpa" . "http://melpa.org/packages/") t)
-  (package-initialize))
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
+(package-initialize)
 
 (defconst imp-packages
   '(anzu
@@ -13,8 +12,6 @@
     cargo
     company
     company-web
-    cmake-ide
-    cmake-mode
     clean-aindent-mode
     comment-dwim-2
     diminish

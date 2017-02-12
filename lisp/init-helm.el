@@ -1,3 +1,12 @@
+(use-package helm
+  :bind
+  (("M-y" . helm-show-kill-ring)
+   ("C-x b" . helm-mini)
+   ("C-x C-f" . helm-find-files)
+   ("C-h SPC" . helm-all-mark-rings)
+   ("C-c h o" . helm-occur)
+   ("C-c h x" . helm-register))
+  )
 (require 'helm-config)
 (require 'helm-grep)
 
@@ -31,17 +40,6 @@
 
 
 (add-to-list 'helm-sources-using-default-as-input 'helm-source-man-pages)
-
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
-(global-set-key (kbd "C-x b") 'helm-mini)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
-(global-set-key (kbd "C-h SPC") 'helm-all-mark-rings)
-(global-set-key (kbd "C-c h o") 'helm-occur)
-
-(global-set-key (kbd "C-c h C-c w") 'helm-wikipedia-suggest)
-
-(global-set-key (kbd "C-c h x") 'helm-register)
-;; (global-set-key (kbd "C-x r j") 'jump-to-register)
 
 (define-key 'help-command (kbd "C-f") 'helm-apropos)
 (define-key 'help-command (kbd "r") 'helm-info-emacs)
