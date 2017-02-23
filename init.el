@@ -166,6 +166,41 @@
   :init (projectile-mode)
   :config (setq projectile-enable-catching t))
 
+;; all-the-icons
+(use-package all-the-icons)
+
+;; neotree
+(use-package neotree
+  :defer t
+  :commands neo-global--window-exists-p
+  :bind ("<f8>" . neotree-projectile)
+  :config
+  (setq neo-smart-open t
+        neo-theme (if (display-graphic-p) 'icons 'arrow)
+        projectile-switch-project-action 'neotree-projectile-action))
+
+(defun neotree-projectile ()
+  "Open neotree with projectile as root and open node for current file.
+If projectile unavailable or not in a project, open node at file path.
+If file path is not available, open $HOME."
+  (interactive)
+  (if (neo-global--window-exists-p)
+      (call-interactively 'neotree-hide)
+    (let ((file-name (buffer-file-name)))
+      (if (and (not file-name)
+               (let ((buffer-name (buffer-name)))
+                 (cond
+                  ((equal buffer-name "*cider-repl server*") nil)
+                  (t t))))
+          (neotree-dir "~/")
+        (let ((dir-name (if (and (fboundp 'projectile-project-p)
+                                 (projectile-project-p))
+                            (projectile-project-root)
+                          (file-name-directory file-name))))
+          (neotree-dir dir-name)
+          (when file-name
+            (neo-buffer--select-file-node file-name)))))))
+
 ;; smex
 (use-package smex
   :defer t
@@ -180,6 +215,11 @@
 (set-frame-font "Source Code Pro-10")
 
 ;; Theme
-(load-theme 'base16-google-dark t)
+(use-package base16-theme
+  :init (load-theme 'base16-google-dark t)
+  :config
+  (set-face-background 'linum "#1d1f21")
+  )
+
 
 ;;; init.el ends here

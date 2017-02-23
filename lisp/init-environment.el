@@ -16,10 +16,12 @@
                  "%b"))))
 (add-hook 'prog-mode-hook 'linum-mode)
 
-(column-number-mode 1)
+(column-number-mode)
 
 (global-hl-line-mode)
 
 (set-default 'cursor-type 'bar)
+
+(global-linum-mode t)
 
 (provide 'init-environment)
